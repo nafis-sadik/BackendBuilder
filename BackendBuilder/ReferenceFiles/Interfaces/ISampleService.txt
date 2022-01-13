@@ -1,0 +1,17 @@
+﻿using Entities;
+using PHubApi.Helpers;
+using System.Collections.Generic;
+
+namespace {{ProjectName}}.Interfaces
+{
+    public interface I{{EntityName}}Service
+    {
+        List<{{EntityName}}> GetAll(PagingParam param, ModelContext _db, out int totalRecord);
+        {{EntityName}} GetById(int id, ModelContext _db);
+        bool Add({{EntityName}} model, ModelContext _db);
+        bool IsExist({{EntityName}} model, ModelContext _db);
+        bool Update({{EntityName}} model, ModelContext _db);
+        bool Delete(int id, string status, ModelContext _db);
+        int ExecuteSQL(string sql, ModelContext _db);
+    }
+}

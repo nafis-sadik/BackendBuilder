@@ -1,0 +1,44 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Common.Helpers;
+using Entities;
+using Microsoft.EntityFrameworkCore;
+using PHubApi.Helpers;
+using PHubApi.Interfaces;
+
+namespace {{ProjectName}}.Services
+{
+    public class {{EntityName}}Service : I{{EntityName}}Service
+    {
+        public bool Add({{EntityName}} model, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+        public bool IsExist({{EntityName}} model, ModelContext _db)
+        public bool IsExist({{EntityName}} model, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+        public bool Delete(int id, string status, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+        public List<{{EntityName}}> GetAll(PagingParam param, ModelContext _db, out int totalRecord)
+        {
+            throw new NotImplementedException();
+        }
+        public {{EntityName}} GetById(int id, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+        public bool Update({{EntityName}} model, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+        public int ExecuteSQL(string sql, ModelContext _db)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

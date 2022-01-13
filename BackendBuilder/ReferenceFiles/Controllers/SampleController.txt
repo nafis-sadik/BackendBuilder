@@ -1,0 +1,187 @@
+﻿using System;
+using System.Linq;
+using Common.Helpers;
+using Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PHubApi.Helpers;
+using PHubApi.Interfaces;
+
+namespace {{ProjectName}}.Controllers
+{
+    [Route("api/{{EntityName}}")]
+    [ApiController]
+    public class {{EntityName}}Controller : ControllerBase
+    {
+        private readonly I{{EntityName}}Service _{{EntityName}}Service;
+        ApiReturnObj returnObj = new ApiReturnObj();
+        private readonly ModelContext _db = new ModelContext();
+        public {{EntityName}}Controller(I{{EntityName}}Service {{EntityName}}Service, ModelContext db)
+        {
+            _{{EntityName}}Service = {{EntityName}}Service;
+            _db = db;
+        }
+        [HttpPost("get-all")]
+        [Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult GetAll(PagingParam param)
+        {
+            try
+            {
+                var data = _{{EntityName}}Service.GetAll(param, out int totalRecord);
+                if (data.Any())
+                {
+                    returnObj.IsExecute = true;
+                    returnObj.ApiData = data;
+                    returnObj.TotalRecord = totalRecord;
+                    return Ok(returnObj);
+                }
+                else
+                {
+                    returnObj.IsExecute = false;
+                    returnObj.ApiData = null;
+                    return Ok(returnObj);
+                }
+            }
+            catch (Exception ex)
+            {
+                returnObj.IsExecute = false;
+                returnObj.Message = ex.Message;
+                returnObj.ApiData = null;
+                return Ok(returnObj);
+            }
+
+        }
+        [HttpGet("get/{id}")]
+        [Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult GetById(int id)
+        {
+            var data = _{{EntityName}}Service.GetById(id);
+            if (data != null)
+            {
+                returnObj.IsExecute = true;
+                returnObj.ApiData = data;
+                return Ok(returnObj);
+            }
+            else
+            {
+                returnObj.IsExecute = false;
+                returnObj.ApiData = null;
+                return Ok(returnObj);
+            }
+        }
+        [HttpPost("add")]
+        [Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult Add(CreateUpdateDataModel<{{EntityName}}> model)
+        {
+            using (var dbTransaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var isExist = _{{EntityName}}Service.IsExist(model.Data);
+                    if (isExist)
+                    {
+                        dbTransaction.Rollback();
+                        returnObj.Message = MessageConst.IsExist;
+                        returnObj.IsExecute = false;
+                        returnObj.ApiData = null;
+                        return Ok(returnObj);
+                    }
+                    var data = _{{EntityName}}Service.Add(model.Data);
+                    if (data)
+                    {
+                        dbTransaction.Commit();
+                        returnObj.IsExecute = true;
+                        returnObj.ApiData = true;
+                        returnObj.Message = MessageConst.Insert;
+                        return Ok(returnObj);
+                    }
+                    else
+                    {
+                        dbTransaction.Rollback();
+                        returnObj.IsExecute = false;
+                        returnObj.ApiData = null;
+                        return Ok(returnObj);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    dbTransaction.Rollback();
+                    returnObj.IsExecute = false;
+                    returnObj.ApiData = null;
+                    return Ok(returnObj);
+                }
+
+            }
+
+        }
+        [HttpPost("update")]
+        [Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult Update(CreateUpdateDataModel<{{EntityName}}> model)
+        {
+            using (var dbTransaction = _db.Database.BeginTransaction())
+            {
+                try
+                {
+                    var data = _{{EntityName}}Service.Update(model.Data);
+                    if (data)
+                    {
+                        dbTransaction.Commit();
+                        returnObj.IsExecute = true;
+                        returnObj.ApiData = true;
+                        returnObj.Message = MessageConst.Update;
+                        return Ok(returnObj);
+                    }
+                    else
+                    {
+                        dbTransaction.Rollback();
+                        returnObj.IsExecute = false;
+                        returnObj.Message = MessageConst.SystemError;
+                        returnObj.ApiData = null;
+                        return Ok(returnObj);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    dbTransaction.Rollback();
+                    returnObj.Message = ex.Message;
+                    returnObj.IsExecute = false;
+                    returnObj.ApiData = null;
+                    return Ok(returnObj);
+                }
+
+            }
+
+        }
+        [HttpGet("delete/{id}/{status}")]
+        [Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult Delete(int id, string status)
+        {
+            var data = _{{EntityName}}Service.Delete(id, status);
+            if (data)
+            {
+                returnObj.IsExecute = true;
+                returnObj.ApiData = true;
+                if (status == "C" || string.IsNullOrEmpty(status))
+                    returnObj.Message = MessageConst.Active;
+                if (status == "A")
+                    returnObj.Message = MessageConst.InActive;
+                return Ok(returnObj);
+            }
+            else
+            {
+                returnObj.IsExecute = false;
+                returnObj.ApiData = null;
+                return Ok(returnObj);
+            }
+        }
+        [HttpGet("update-and-insert/{sql}")]
+        //[Authorize(Policy = "OnlyNonBlockedCustomer")]
+        public IActionResult UpdateAndInsert(string sql)
+        {
+            var data = _{{EntityName}}Service.ExecuteSQL(sql, _db);
+            returnObj.IsExecute = true;
+            returnObj.ApiData = data;
+            return Ok(returnObj);
+        }
+    }
+}
